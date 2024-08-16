@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Token Display</title>
+    <script src="https://static.yoomoney.ru/checkout-js/v1/checkout.js"></script>
+</head>
+<body>
+    <div id="token-display">Token will be displayed here.</div>
+
+    <script>
+        // Получение параметров из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const number = urlParams.get('number');
+        const cvc = urlParams.get('cvc');
+        const month = urlParams.get('month');
+        const year = urlParams.get('year');
+
+        // Проверка наличия всех необходимых параметров
+        if (number && cvc && month && year) {
+            // Инициализация Checkout.js
+            const checkout = YooMoneyCheckout('441223');
+            checkout.tokenize({
+                number: number,
+                cvc: cvc,
+                month: month,
+                year: year
+            }).then(res => {
+                if (res.status === 'success') {
+                    const { paymentToken } = res.data.response;
+                    // Найти элемент и обновить его содержимое
+                    const tokenDisplay = document.getElementById('token-display');
+                    tokenDisplay.textContent = paymentToken;
+                } else {
+                    // Обработка ошибок
+                    const tokenDisplay = document.getElementById('token-display');
+                    tokenDisplay.textContent = 'Failed to retrieve payment token.';
+                }
+            }).catch(error => {
+                // Обработка исключений
+                const tokenDisplay = document.getElementById('token-display');
+                tokenDisplay.textContent = 'Error: ' + error.message;
+            });
+        } else {
+            // Если параметры отсутствуют
+            const tokenDisplay = document.getElementById('token-display');
+            tokenDisplay.textContent = 'Missing required parameters in URL.';
+        }
+    </script>
+</body>
+</html>
